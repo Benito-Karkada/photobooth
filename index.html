@@ -78,8 +78,8 @@
         function createPhotoStrip() {
             const stripCanvas = document.createElement("canvas");
             const stripCtx = stripCanvas.getContext("2d");
-            stripCanvas.width = 140;
-            stripCanvas.height = images.length * 170; // Adding space between images
+            stripCanvas.width = 280;
+            stripCanvas.height = images.length * 340; // Adding space between images
             stripCtx.fillStyle = "#fbe3e8";
             stripCtx.fillRect(0, 0, stripCanvas.width, stripCanvas.height);
             
@@ -87,7 +87,7 @@
                 let img = new Image();
                 img.src = imgSrc;
                 img.onload = () => {
-                    stripCtx.drawImage(img, 10, index * 170 + 10, 120, 160);
+                    stripCtx.drawImage(img, 20, index * 340 + 20, 240, 320);
                     stripCtx.strokeStyle = "#d1a3a4";
                     stripCtx.lineWidth = 2;
                     stripCtx.strokeRect(10, index * 170 + 10, 120, 160);
@@ -96,7 +96,7 @@
             
             downloadBtn.onclick = () => {
                 let link = document.createElement("a");
-                link.href = stripCanvas.toDataURL("image/png");
+                link.href = stripCanvas.toDataURL("image/png", 1.0);
                 link.download = "photo_strip.png";
                 link.click();
             };
