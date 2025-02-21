@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Photo Booth</title>
+    <style>
+        body { text-align: center; font-family: Arial, sans-serif; }
+        #video { width: 100%; max-width: 400px; }
+        #photo-strip { display: flex; justify-content: center; gap: 5px; }
+        canvas { display: none; }
+        .strip img { width: 80px; height: 100px; }
+        button { margin: 10px; padding: 10px 20px; font-size: 16px; }
+    </style>
+</head>
+<body>
+    <h1>Photo Booth</h1>
+    <video id="video" autoplay></video>
+    <canvas id="canvas"></canvas>
+    <div id="photo-strip" class="strip"></div>
+    <br>
+    <button id="start-btn">Start</button>
+    <button id="download-btn" style="display: none;">Download Strip</button>
+    <button id="restart-btn" style="display: none;">Restart</button>
+
+    <script>
+        const video = document.getElementById("video");
+        const canvas = document.getElementById("canvas");
+        const ctx = canvas.getContext("2d");
+        const photoStrip = document.getElementById("photo-strip");
+        const startBtn = document.getElementById("start-btn");
+        const downloadBtn = document.getElementById("download-btn");
+        const restartBtn = document.getElementById("restart-btn");
+        let images = [];
+
+        // Access webcam
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(stream => video.srcObject = stream)
+            .catch(err => console.error("Error accessing webcam:", err));
+
+        async function takePhotos() {
+            images = [];
+            photoStrip.innerHTML = "";
+            startBtn.style.display = "none";
+            downloadBtn.style.display = "none";
+            restartBtn.style.display = "none";
+
+            for (let i = 5; i > 0; i--) {
+                alert("Capturing in " + i + " seconds!");
+                await new Promise(r => setTimeout(r, 1000));
+            }
+            
+            for (let i = 0; i < 5; i++) {
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                let imgData = canvas.toDataURL("image/png");
+                images.push(imgData);
+                let img = document.createElement("img");
+                img.src = imgData;
+                photoStrip.appendChild(img);
+                await new Promise(r => setTimeout(r, 2000)); // 2s delay
+            }
+            
+            createPhotoStrip();
+            downloadBtn.style.display = "inline-block";
+            restartBtn.style.display = "inline-block";
+        }
+
+        function createPhotoStrip() {
+            const stripCanvas = document.createElement("canvas");
+            const stripCtx = stripCanvas.getContext("2d");
+            stripCanvas.width = 400;
+            stripCanvas.height = 100;
+            images.forEach((imgSrc, index) => {
+                let img = new Image();
+                img.src = imgSrc;
+                img.onload = () => stripCtx.drawImage(img, index * 80, 0, 80, 100);
+            });
+            downloadBtn.onclick = () => {
+                let link = document.createElement("a");
+                link.href = stripCanvas.toDataURL("image/png");
+                link.download = "photo_strip.png";
+                link.click();
+            };
+        }
+
+        startBtn.onclick = takePhotos;
+        restartBtn.onclick = () => location.reload();
+    </script>
+</body>
+</html>
